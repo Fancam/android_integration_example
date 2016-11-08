@@ -18,6 +18,11 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.common.api.GoogleApiClient;
+
 /**
  * Created by nealshail on 14/10/2016.
  */
@@ -28,6 +33,11 @@ public class FancamWebViewActvity extends Activity {
     private WebView mWebviewPop;        // for handling facebook / twitter / login popups
     private FrameLayout mContainer;
     private Context mContext;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
 
     @Override
@@ -36,7 +46,7 @@ public class FancamWebViewActvity extends Activity {
         Log.d("FancamWebViewActivity", "onCreate");
 
         setContentView(R.layout.activity_webview);
-        mWebView = (WebView)findViewById(R.id.webview_display);
+        mWebView = (WebView) findViewById(R.id.webview_display);
         mContainer = (FrameLayout) findViewById(R.id.webview_frame);
 
         CookieManager cookieManager = CookieManager.getInstance();
@@ -54,22 +64,65 @@ public class FancamWebViewActvity extends Activity {
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         mWebView.setWebViewClient(new UriWebViewClient(url));
         mWebView.setWebChromeClient(new UriWebChromeClient(url));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            mWebView.setWebContentsDebuggingEnabled(true);
+        }
+        webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
 
         mWebView.loadUrl(url);  // load the web page
 
-        mContext=this.getApplicationContext();
+        mContext = this.getApplicationContext();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
 
-        if ((keyCode == KeyEvent.KEYCODE_BACK) && mWebView.canGoBack()){
+        if ((keyCode == KeyEvent.KEYCODE_BACK) && mWebView.canGoBack()) {
             mWebView.goBack();
             return true;
         }
 
         return super.onKeyDown(keyCode, event);
+    }
+
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("FancamWebViewActvity Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        AppIndex.AppIndexApi.start(client, getIndexApiAction());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(client, getIndexApiAction());
+        client.disconnect();
     }
 
 
@@ -78,7 +131,7 @@ public class FancamWebViewActvity extends Activity {
         String mOriginUrl;
 
         public UriWebViewClient(String originUrl) {
-            mOriginUrl = (originUrl == null || !originUrl.contains("?")) ? originUrl : originUrl.substring(0, originUrl.indexOf("?") );
+            mOriginUrl = (originUrl == null || !originUrl.contains("?")) ? originUrl : originUrl.substring(0, originUrl.indexOf("?"));
         }
 
         @Override
@@ -86,11 +139,11 @@ public class FancamWebViewActvity extends Activity {
             String host = Uri.parse(url).getHost();
             Log.d("FancamWebViewActivity", "shouldOverrideUrlLoading: " + url);
 
-            if( url.startsWith("http:") || url.startsWith("https:") ) {
+            if (url.startsWith("http:") || url.startsWith("https:")) {
                 // the sites below are handled by us:
 
                 // facebook popups (via the mWebviewPop)
-                if (    host.equals("m.facebook.com") ||
+                if (host.equals("m.facebook.com") ||
                         host.equals("www.facebook.com") ||
                         host.equals("facebook.com")) {
                     return false; // pass this on so that ChromeClient will handle in onCreateWindow
@@ -102,7 +155,7 @@ public class FancamWebViewActvity extends Activity {
                 }
 
                 // another fancam?
-                if (host.contains("fancam")){
+                if (host.contains("fancam")) {
                     return false;
                 }
 
@@ -124,8 +177,8 @@ public class FancamWebViewActvity extends Activity {
             else if (url.startsWith("mailto:")) {
                 Intent mail = new Intent(Intent.ACTION_SEND);
                 mail.setType("application/octet-stream");
-                String address = new String(url.replace("mailto:" , "")) ;
-                mail.putExtra(Intent.EXTRA_EMAIL, new String[]{ address });
+                String address = new String(url.replace("mailto:", ""));
+                mail.putExtra(Intent.EXTRA_EMAIL, new String[]{address});
                 mail.putExtra(Intent.EXTRA_SUBJECT, "");
                 mail.putExtra(Intent.EXTRA_TEXT, "");
                 startActivity(mail);
@@ -160,6 +213,9 @@ public class FancamWebViewActvity extends Activity {
             mWebviewPop.setWebViewClient(new UriWebViewClient(mOriginUrl));
             mWebviewPop.setWebChromeClient(new UriWebChromeClient(mOriginUrl));
             mWebviewPop.getSettings().setJavaScriptEnabled(true);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                mWebviewPop.setWebContentsDebuggingEnabled(true);
+            }
             mWebviewPop.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT));
             mContainer.addView(mWebviewPop);
@@ -174,11 +230,10 @@ public class FancamWebViewActvity extends Activity {
         public void onCloseWindow(WebView window) {
             Log.d("FancamWebViewActivity", "onCloseWindow: " + window.getUrl());
 
-            if(mWebviewPop!=null)
-            {
+            if (mWebviewPop != null) {
                 mWebviewPop.setVisibility(View.GONE);
                 mContainer.removeView(mWebviewPop);
-                mWebviewPop=null;
+                mWebviewPop = null;
             }
         }
 
